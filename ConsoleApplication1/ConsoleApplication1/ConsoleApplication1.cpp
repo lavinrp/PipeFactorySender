@@ -41,7 +41,7 @@ int main()
 	}
 
 	//Write
-	int data[5] = { 1,2,3,4,5 };
+	DWORD data[5] = { 1,2,3,4,5 };
 	DWORD bytesWritten;
 	bool succcessfulWrite = WriteFile(
 		hPipe,

@@ -56,21 +56,24 @@ int main()
 		cout << "Failed to connect to pipe" << endl;
 	}
 
-	wchar_t buffer[128];
+	DWORD buffer[128];
 	DWORD bytesRead = 0;
 
 	bool readResult = ReadFile(
 		hPipe,
 		buffer,
-		127 * sizeof(wchar_t),
+		127 * sizeof(DWORD),
 		&bytesRead,
 		NULL);
 
 
 	if (readResult) {
-		buffer[bytesRead / sizeof(wchar_t)] = '\0';
+		//buffer[bytesRead / sizeof(wchar_t)] = '\0';
 		cout << "read " << bytesRead << endl;
-		cout << buffer << endl;
+		for (unsigned int i = 0; i < bytesRead / sizeof(DWORD); i++) {
+			cout << (DWORD)buffer[i] << endl;
+		}
+		//cout << buffer << endl;
 	}
 	else
 	{
