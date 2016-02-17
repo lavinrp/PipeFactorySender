@@ -12,6 +12,7 @@ struct point3D
 	int z;
 };
 
+//client
 int main()
 {
 
@@ -20,20 +21,19 @@ int main()
 	HANDLE hPipe;
 
 	//size of data to pass
-	DWORD outSize = sizeof(int);
-	DWORD inSize = sizeof(int);
-	DWORD bytesRead;
-	bool fSuccess = false;
+	//DWORD outSize = sizeof(int);
+	//DWORD inSize = sizeof(int);
+	//bool fSuccess = false;
 
 	while (true)
 	{
 		hPipe = CreateFile(
 			pipeName,
 			GENERIC_READ,
+			FILE_SHARE_READ | FILE_SHARE_WRITE,
 			NULL,
-			NULL,
-			OPEN_ALWAYS,
-			NULL,
+			OPEN_EXISTING,
+			FILE_ATTRIBUTE_NORMAL,
 			NULL);
 
 			if (hPipe != INVALID_HANDLE_VALUE) {
@@ -51,30 +51,36 @@ int main()
 			}
 	}
 
-	do {
-		//read from pipe
-		point3D points[3];
+	if (hPipe == INVALID_HANDLE_VALUE)
+	{
+		cout << "Failed to connect to pipe" << endl;
+	}
 
-		fSuccess = ReadFile(
-			hPipe,
-			points,
-			sizeof(points),
-			&bytesRead,
-			nullptr);
+	wchar_t buffer[128];
+	DWORD bytesRead = 0;
 
-		if (!fSuccess && GetLastError() != ERROR_MORE_DATA) {
-			cout << "Unexpected Error: " << GetLastError() << endl;
-			return -3;
-		}
-
-		for (unsigned int i = 0; i < 3; i++) {
-			point3D pointI = points[i];
-			cout << "point" << i << ":\r\nx: " << pointI.x << "\r\ny: " << pointI.y << "\r\nz: " << pointI.z << endl;
-		}
-
-	} while (!fSuccess);
+	bool readResult = ReadFile(
+		hPipe,
+		buffer,
+		127 * sizeof(wchar_t),
+		&bytesRead,
+		NULL);
 
 
+	if (readResult) {
+		buffer[bytesRead / sizeof(wchar_t)] = '\0';
+		cout << "read " << bytesRead << endl;
+		cout << buffer << endl;
+	}
+	else
+	{
+		cout << "error reading data" << endl;
+		cout << endl << endl << GetLastError();
+	}
+
+	CloseHandle(hPipe);
+
+	system("pause");
     return 0;
 }
 

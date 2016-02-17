@@ -12,45 +12,57 @@ struct point3D
 	int z;
 };
 
+//server
 int main()
 {
 	//pipe
 	LPTSTR pipeName = TEXT("\\\\.\\pipe\\testPipe");
 	HANDLE hPipe;
 
-	//size of data to pass
-	DWORD outSize = 3 * sizeof(point3D);
-	DWORD inSize = 3 * sizeof(point3D);
-	DWORD bytesWritten;
-	bool fSuccess = false;
-
 	//create pipe
-	hPipe = CreateNamedPipe(pipeName, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_MESSAGE, 1, outSize, inSize, NULL, NULL);
+	hPipe = CreateNamedPipe(pipeName, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_BYTE, 1, 0, 0, 0, NULL);
 
-	//write point 3d
-	bool end = false;
-	int addition = 0;
-	do 
+	if (!hPipe || hPipe == INVALID_HANDLE_VALUE) 
 	{
-		point3D mesages[3];
-		point3D mesage;
-		mesage.x = 10 + addition;
-		mesage.y = 20 + addition;
-		mesage.z = 30 + addition;
-		mesages[0] = mesage;
-		mesages[1] = mesage;
-		mesages[2] = mesage;
+		cout << "failed to make pipe" << endl;
+		cout << endl << endl << GetLastError() << endl;
+		system("pause");
+		return 1;
+	}
 
-		fSuccess = WriteFile(hPipe, mesages, sizeof(mesages), &bytesWritten, NULL);
-		cout << fSuccess << endl;
+	bool successfulConnection = ConnectNamedPipe(hPipe, NULL);
 
-		addition += 100;
-		cin >> end;
-	} while (!end);
+	if (!successfulConnection) 
+	{
+		cout << "bad connection" << endl << endl;
+		cout << GetLastError() << endl;
+		system("pause");
+		return 2;
+	}
+
+	//Write
+	int data[5] = { 1,2,3,4,5 };
+	DWORD bytesWritten;
+	bool succcessfulWrite = WriteFile(
+		hPipe,
+		data,
+		sizeof(data),
+		&bytesWritten,
+		NULL);
+
+	if (succcessfulWrite)
+	{
+		cout << "sent " << bytesWritten << endl;
+	}
+	else
+	{
+		cout << "failed to send data" << endl;
+	}
 
 	//close pipe
 	CloseHandle(hPipe);
 
+	system("pause");
     return 0;
 }
 
