@@ -64,27 +64,46 @@ int main()
 	DWORD bytesRead = 0;
 
 	//Read from pipe
-	bool readResult = ReadFile(
-		hPipe,					//pipe
-		buffer,					//Write location
-		127 * sizeof(DWORD),	//number of bytes to read
-		&bytesRead,				//bytes read
-		NULL);					//Overlapped
 
-	//Run Logic on successful read
-	if (readResult) 
+	//read until stop for some reason
+	bool stop = false;
+	while (!stop)
 	{
-		cout << "read " << bytesRead << endl;
-		for (unsigned int i = 0; i < bytesRead / sizeof(DWORD); i++) 
+		bool readResult = ReadFile(
+			hPipe,					//pipe
+			buffer,					//Write location
+			127 * sizeof(DWORD),	//number of bytes to read
+			&bytesRead,				//bytes read
+			NULL);					//Overlapped
+
+		//Run Logic on successful read
+		if (readResult) 
 		{
-			cout << (DWORD)buffer[i] << endl;
+			cout << "read loop" << endl;
+			cout << "read " << bytesRead << endl;
+			unsigned int inputCount = bytesRead / sizeof(DWORD);
+
+			//stop read loop on key value
+			if ((DWORD)buffer[inputCount - 1] == -1)
+			{
+				stop = true;
+				break;
+			}
+			/////////put logic here////////////////////////////
+			for (unsigned int i = 0; i < inputCount; i++) 
+			{
+				cout << (DWORD)buffer[i] << endl;
+			}
+			/////////end logic////////////////////////////////
+
+			
 		}
-	}
-	//Output error on unsuccessful read
-	else
-	{
-		cout << "error reading data" << endl;
-		cout << endl << endl << GetLastError();
+		//Output error on unsuccessful read
+		else
+		{
+			cout << "error reading data" << endl;
+			cout << endl << endl << GetLastError();
+		}
 	}
 
 	//clean up

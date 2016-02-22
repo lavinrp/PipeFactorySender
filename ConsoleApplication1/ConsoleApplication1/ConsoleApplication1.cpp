@@ -43,26 +43,48 @@ int main()
 		return 2;
 	}
 
-	//Data to write
-	DWORD data[5] = { 1,2,3,4,5 };
-	DWORD bytesWritten;
+	bool stop = false;
 
-	//write data
-	bool succcessfulWrite = WriteFile(
-		hPipe,
-		data,
-		sizeof(data),
-		&bytesWritten,
-		NULL);
+	while (!stop)
+	{
+		//Data to write
+		DWORD data[5];
+		DWORD bytesWritten;
 
-	//logic with written data
-	if (succcessfulWrite)
-	{
-		cout << "sent " << bytesWritten << endl;
-	}
-	else
-	{
-		cout << "failed to send data" << endl;
+		cout << "input data. use -1 as 5th value to stop" << endl;
+		for (unsigned int i = 0; i < 5; ++i)
+		{
+			cout << "data " << i << ":";
+			cin >> data[i];
+		}
+
+		//write data
+		bool succcessfulWrite = WriteFile(
+			hPipe,
+			data,
+			sizeof(data),
+			&bytesWritten,
+			NULL);
+		///////////////////////////////
+		//	logic with written data	//
+		/////////////////////////////
+		if (succcessfulWrite)
+		{
+			cout << "sent " << bytesWritten << endl;
+		}
+		else
+		{
+			cout << "failed to send data" << endl;
+		}
+		////////////////
+		//	EndLogic //
+		//////////////
+
+		//	stop write loop on key value
+		if (data[4] == -1)
+		{
+			stop = true;
+		}
 	}
 
 	//close pipe
