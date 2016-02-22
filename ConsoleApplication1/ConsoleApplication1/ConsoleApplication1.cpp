@@ -22,6 +22,7 @@ int main()
 	//create pipe
 	hPipe = CreateNamedPipe(pipeName, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_BYTE, 1, 0, 0, 0, NULL);
 
+	//handle bad pipe creation
 	if (!hPipe || hPipe == INVALID_HANDLE_VALUE) 
 	{
 		cout << "failed to make pipe" << endl;
@@ -30,8 +31,10 @@ int main()
 		return 1;
 	}
 
+	//Connect to consumer
 	bool successfulConnection = ConnectNamedPipe(hPipe, NULL);
 
+	//handle bad connection
 	if (!successfulConnection) 
 	{
 		cout << "bad connection" << endl << endl;
@@ -40,9 +43,11 @@ int main()
 		return 2;
 	}
 
-	//Write
+	//Data to write
 	DWORD data[5] = { 1,2,3,4,5 };
 	DWORD bytesWritten;
+
+	//write data
 	bool succcessfulWrite = WriteFile(
 		hPipe,
 		data,
@@ -50,6 +55,7 @@ int main()
 		&bytesWritten,
 		NULL);
 
+	//logic with written data
 	if (succcessfulWrite)
 	{
 		cout << "sent " << bytesWritten << endl;
