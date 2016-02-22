@@ -20,11 +20,7 @@ int main()
 	LPTSTR pipeName = TEXT("\\\\.\\pipe\\testPipe");
 	HANDLE hPipe;
 
-	//size of data to pass
-	//DWORD outSize = sizeof(int);
-	//DWORD inSize = sizeof(int);
-	//bool fSuccess = false;
-
+	//connect to pipe
 	while (true)
 	{
 		hPipe = CreateFile(
@@ -36,51 +32,62 @@ int main()
 			FILE_ATTRIBUTE_NORMAL,
 			NULL);
 
-			if (hPipe != INVALID_HANDLE_VALUE) {
+			//pipe found break connection loop
+			if (hPipe != INVALID_HANDLE_VALUE) 
+			{
 				break;
 			}
 
-			if (GetLastError() != ERROR_PIPE_BUSY) {
+			//unexpected pipe error
+			if (GetLastError() != ERROR_PIPE_BUSY) 
+			{
 				cout << "Unexpected Error: "<< GetLastError() << endl;
 				return -1;
 			}
 
-			if (!WaitNamedPipe(pipeName, 20000)) {
+			//only wait 20000 ms for pipe connection
+			if (!WaitNamedPipe(pipeName, 20000)) 
+			{
 				cout << "cant open pipe" << endl;
 				return -2;
 			}
 	}
 
+	//If pipe is somehow still invalid throw error
 	if (hPipe == INVALID_HANDLE_VALUE)
 	{
 		cout << "Failed to connect to pipe" << endl;
 	}
 
+	//create buffer and bytesRead
 	DWORD buffer[128];
 	DWORD bytesRead = 0;
 
+	//Read from pipe
 	bool readResult = ReadFile(
-		hPipe,
-		buffer,
-		127 * sizeof(DWORD),
-		&bytesRead,
-		NULL);
+		hPipe,					//pipe
+		buffer,					//Write location
+		127 * sizeof(DWORD),	//number of bytes to read
+		&bytesRead,				//bytes read
+		NULL);					//Overlapped
 
-
-	if (readResult) {
-		//buffer[bytesRead / sizeof(wchar_t)] = '\0';
+	//Run Logic on successful read
+	if (readResult) 
+	{
 		cout << "read " << bytesRead << endl;
-		for (unsigned int i = 0; i < bytesRead / sizeof(DWORD); i++) {
+		for (unsigned int i = 0; i < bytesRead / sizeof(DWORD); i++) 
+		{
 			cout << (DWORD)buffer[i] << endl;
 		}
-		//cout << buffer << endl;
 	}
+	//Output error on unsuccessful read
 	else
 	{
 		cout << "error reading data" << endl;
 		cout << endl << endl << GetLastError();
 	}
 
+	//clean up
 	CloseHandle(hPipe);
 
 	system("pause");
