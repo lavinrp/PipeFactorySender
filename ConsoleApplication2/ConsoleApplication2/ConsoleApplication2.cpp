@@ -20,17 +20,19 @@ int main()
 	LPTSTR pipeName = TEXT("\\\\.\\pipe\\testPipe");
 	HANDLE hPipe;
 
+	hPipe = CreateFile(
+		pipeName,
+		GENERIC_READ,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL);
+
 	//connect to pipe
 	while (true)
 	{
-		hPipe = CreateFile(
-			pipeName,
-			GENERIC_READ,
-			FILE_SHARE_READ | FILE_SHARE_WRITE,
-			NULL,
-			OPEN_EXISTING,
-			FILE_ATTRIBUTE_NORMAL,
-			NULL);
+		
 
 			//pipe found break connection loop
 			if (hPipe != INVALID_HANDLE_VALUE) 
